@@ -44,5 +44,15 @@ namespace FirstAPI.Controllers
             return Ok(task);
         }
 
+        [HttpPost]
+
+        public ActionResult<TaskItem> AddTaskItem(TaskItem newtask)
+        {
+            if (newtask == null)
+                return BadRequest();
+            
+            tasks.Add(newtask);
+            return CreatedAtAction(nameof(GetTaskItemById), new {Id = newtask.Id},newtask);
+        }
     }
 }
