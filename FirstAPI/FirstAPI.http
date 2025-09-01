@@ -8,14 +8,24 @@ GET {{rootURl}}/api/task
 Accept: application/json
 
 ###
-GET {{rootURl}}/api/task/2
+GET {{rootURl}}/api/task/4
 Accept:application/json
 
 ###
 POST {{rootURl}}/api/task
 Content-Type : application/json
 {
-  "Id" : 5,
   "Title" : "work",
   "IsDone" : true
 }
+###
+PUT {{rootURl}}/api/task/4
+Content-Type : application/json
+{
+
+  "Id" : 4,
+  "Title" : "worktest",
+  "IsDone" : true
+}
+###
+DELETE {{rootURl}}/api/task/4
