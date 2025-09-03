@@ -15,17 +15,17 @@ Accept:application/json
 POST {{rootURl}}/api/task
 Content-Type : application/json
 {
-  "Title" : "work",
+  "Title" : "Test2",
   "IsDone" : true
 }
 ###
-PUT {{rootURl}}/api/task/4
+PUT {{rootURl}}/api/task/5
 Content-Type : application/json
 {
 
-  "Id" : 4,
-  "Title" : "worktest",
+  "Id" : 5,
+  "Title" : "test12",
   "IsDone" : true
 }
 ###
-DELETE {{rootURl}}/api/task/4
+DELETE {{rootURl}}/api/task/7

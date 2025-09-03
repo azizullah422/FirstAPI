@@ -8,6 +8,7 @@ namespace FirstAPI.Data
     {
         public FirstApiContext(DbContextOptions<FirstApiContext> options):base(options) {}
 
+        public DbSet<TaskItem> Tasks { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -34,6 +35,6 @@ namespace FirstAPI.Data
 
                 );
         }
-        public DbSet<TaskItem> Tasks { get; set; }
+        
     }
 }
