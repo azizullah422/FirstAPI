@@ -1,0 +1,14 @@
+
+  { "Title": "Update LinkedIn headline", "IsDone": false },
+  { "Title": "Prepare weekly meal plan", "IsDone": true  },
+  { "Title": "Read one AI article", "IsDone": false },
+  { "Title": "Backup database", "IsDone": true  },
+  { "Title": "Email recruiter", "IsDone": false },
+  { "Title": "Write unit tests", "IsDone": false },
+  { "Title": "Deploy API to Azure", "IsDone": true  },
+  { "Title": "Order HDMI cable", "IsDone": false },
+  { "Title": "Refill Oyster card", "IsDone": true  },
+  { "Title": "Pay council tax", "IsDone": false },
+  { "Title": "Plan weekend trip", "IsDone": false },
+  { "Title": "Water plants", "IsDone": true  }
+

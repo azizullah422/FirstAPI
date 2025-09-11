@@ -2,6 +2,7 @@
 using FirstAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace FirstAPI.Controllers
@@ -38,10 +39,17 @@ namespace FirstAPI.Controllers
         {
             _context = context;
         }
-        [HttpGet]
-        public async Task<ActionResult<List<TaskItem>>> GetTasks()
+        [HttpGet("offset")]
+        public async Task<ActionResult<List<TaskItem>>> GetTasks(int limit = 5 , int page = 1)
         {
-            return Ok(await _context.Tasks.ToListAsync());
+            var task = await _context.Tasks
+                .AsNoTracking()
+                .OrderBy(a => a.Id)
+                .Skip(limit * (page - 1))
+                .Take(limit)
+                .ToListAsync();
+            return Ok(task);
+            //return Ok(await _context.Tasks.ToListAsync());
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskItem>> GetTaskItemById(int id)

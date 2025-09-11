@@ -6,7 +6,7 @@ namespace FirstAPI.Models
     {
         public int Id { get; set; }
 
-        public String Title { get; set; }
+        public String Title { get; set; } = String.Empty;
 
         public bool IsDone { get; set; }
 
