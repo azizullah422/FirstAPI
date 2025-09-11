@@ -39,6 +39,11 @@ namespace FirstAPI.Controllers
         {
             _context = context;
         }
+        [HttpGet]
+        public async Task<ActionResult<List<TaskItem>>> GetTask()
+        {
+            return Ok(await _context.Tasks.ToListAsync());
+        }
         [HttpGet("offset")]
         public async Task<ActionResult<List<TaskItem>>> GetTasks(int limit = 5 , int page = 1)
         {
@@ -49,7 +54,7 @@ namespace FirstAPI.Controllers
                 .Take(limit)
                 .ToListAsync();
             return Ok(task);
-            //return Ok(await _context.Tasks.ToListAsync());
+            
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskItem>> GetTaskItemById(int id)
