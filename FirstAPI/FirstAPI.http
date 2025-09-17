@@ -19,12 +19,11 @@ Content-Type : application/json
   "IsDone" : true
 }
 ###
-PUT {{rootURl}}/api/task/5
+PUT {{rootURl}}/api/task/3
 Content-Type : application/json
 {
 
-  "Id" : 5,
-  "Title" : "test12",
+  "Title" : "Lunch",
   "IsDone" : true
 }
 ###

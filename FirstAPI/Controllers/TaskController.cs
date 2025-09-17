@@ -1,9 +1,13 @@
-﻿using FirstAPI.Data;
+﻿using Azure.Identity;
+using FirstAPI.Data;
 using FirstAPI.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Net.Mail;
 
 namespace FirstAPI.Controllers
 {
@@ -39,6 +43,32 @@ namespace FirstAPI.Controllers
         {
             _context = context;
         }
+
+        const string SMTP_HOST = "smtp.gmail.com";
+        const int SMTP_PORT = 587;
+        const string SMTP_USER = "m.azizullah000@gmail.com";
+        const string SMTP_PASS = "iowywfiuilulhqev";
+
+        public async Task SendEmailAsync(string to,string subject,string body)
+        {
+            to = to.Trim();
+            if(String .IsNullOrWhiteSpace(to)|| !MailAddress.TryCreate(to, out var toAddr))
+                throw new ArgumentException("Invalid" , nameof(to));
+            var fromAddr = new MailAddress(SMTP_USER, "Task App");
+            using var message = new MailMessage(fromAddr, toAddr)
+            {
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+            using var client = new SmtpClient(SMTP_HOST, SMTP_PORT)
+            {
+                EnableSsl = true,
+                Credentials = new NetworkCredential(SMTP_USER, SMTP_PASS)
+            };
+            await client.SendMailAsync(message);
+        }
+
         [HttpGet]
         public async Task<ActionResult<List<TaskItem>>> GetTask()
         {
@@ -80,20 +110,54 @@ namespace FirstAPI.Controllers
 
         [HttpPut("{id}")]
 
-        public async Task<IActionResult> UpdateTaskItem(int id, TaskItem UpdatedTaskItem)
+        public async Task<IActionResult> UpdateTaskItem(int id, TaskItem UpdatedTaskItem, string? to)
         {
             var task = await _context.Tasks.FindAsync(id);
             if (task == null)
                 return NotFound();
 
-            task.Id = UpdatedTaskItem.Id;
+            var wasDone = task.IsDone;
+           
             task.Title = UpdatedTaskItem.Title;
             task.IsDone = UpdatedTaskItem.IsDone;
-
             await _context.SaveChangesAsync();
-            return NoContent();
+
+            if (!wasDone && task.IsDone && !string.IsNullOrWhiteSpace(to))
+            {
+                await SendEmailAsync(
+                    to,
+                    $"Task Completed :{task.Title}",
+                    $"<p>{task.Title} (ID{task.Id}) was marked as done  at {DateTime.UtcNow:u}.</p>");
+
+            }
+            return Ok(new {task.Id,task.Title,task.IsDone});
+                
+            
+
 
         }
+
+        [HttpPatch("{id}")]
+
+        //public async Task<IActionResult> PatchTaskItem(int id, JsonPatchDocument<TaskItem> patchTaskItem)
+        //{
+        //    if (patchTaskItem == null)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    var task = await _context.Tasks.FindAsync(id);
+        //    if (task == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    patchTaskItem.ApplyTo(task);
+            
+
+        //    await _context.SaveChangesAsync();
+        //    return NoContent();
+
+        //}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaskItem(int id)
         {
