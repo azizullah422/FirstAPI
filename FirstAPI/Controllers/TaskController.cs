@@ -1,11 +1,13 @@
 ﻿using Azure.Identity;
 using FirstAPI.Data;
 using FirstAPI.Models;
+using FirstAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Net;
 using System.Net.Mail;
 
@@ -38,37 +40,13 @@ namespace FirstAPI.Controllers
         //};
 
         private readonly FirstApiContext _context;
+        private readonly IAppEmailSender _email;
 
-        public TaskController(FirstApiContext context)
+        public TaskController(FirstApiContext context,IAppEmailSender email)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context)) ;
+            _email = email ?? throw new ArgumentNullException(nameof(email));
         }
-
-        const string SMTP_HOST = "smtp.gmail.com";
-        const int SMTP_PORT = 587;
-        const string SMTP_USER = "m.azizullah000@gmail.com";
-        const string SMTP_PASS = "iowywfiuilulhqev";
-
-        public async Task SendEmailAsync(string to,string subject,string body)
-        {
-            to = to.Trim();
-            if(String .IsNullOrWhiteSpace(to)|| !MailAddress.TryCreate(to, out var toAddr))
-                throw new ArgumentException("Invalid" , nameof(to));
-            var fromAddr = new MailAddress(SMTP_USER, "Task App");
-            using var message = new MailMessage(fromAddr, toAddr)
-            {
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true
-            };
-            using var client = new SmtpClient(SMTP_HOST, SMTP_PORT)
-            {
-                EnableSsl = true,
-                Credentials = new NetworkCredential(SMTP_USER, SMTP_PASS)
-            };
-            await client.SendMailAsync(message);
-        }
-
         [HttpGet]
         public async Task<ActionResult<List<TaskItem>>> GetTask()
         {
@@ -86,6 +64,22 @@ namespace FirstAPI.Controllers
             return Ok(task);
             
         }
+
+        [HttpPost("email-test")]
+        public async Task<IActionResult> EmailTest([FromServices] IAppEmailSender email, [FromQuery] string to)
+        {
+            try
+            {
+                await email.SendAsync(to, "Test", "<p>This is a test.</p>");
+                return Ok("sent");
+            }
+            catch (Exception ex)
+            {
+                // Returns the real reason while you're debugging
+                return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskItem>> GetTaskItemById(int id)
         {
@@ -124,7 +118,7 @@ namespace FirstAPI.Controllers
 
             if (!wasDone && task.IsDone && !string.IsNullOrWhiteSpace(to))
             {
-                await SendEmailAsync(
+                await _email.SendAsync(
                     to,
                     $"Task Completed :{task.Title}",
                     $"<p>{task.Title} (ID{task.Id}) was marked as done  at {DateTime.UtcNow:u}.</p>");
@@ -170,6 +164,13 @@ namespace FirstAPI.Controllers
             return NoContent();
 
         }
+        [HttpGet("config-test")]
+        public IActionResult ConfigTest([FromServices] Microsoft.Extensions.Options.IOptions<SmtpOptions> opts)
+        {
+            var o = opts.Value;
+            return Ok(new { o.Host, o.Port, o.EnableSsl, o.User, o.From, PassLen = (o.Pass ?? "").Length });
+        }
+
 
     }
 }
